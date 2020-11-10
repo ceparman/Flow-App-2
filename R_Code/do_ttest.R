@@ -1,6 +1,8 @@
 do_ttest<-function(all_data,input,compounds,controls)
 {
+write.csv(all_data,"temp_tt_alldata.csv")
 
+   
 #remove blanks
   all_data <- all_data[!is.na(all_data$concentration),]
   
@@ -40,15 +42,18 @@ for(j in 1:length(concentrations))
    
 #   print(paste(test_data$var_compound[1], concentrations[j],p))
    
+   write.csv(test_data,"temp_tt_testdata.csv")
+   write.csv(control_data,"temp_tt_controldata.csv")
+   
    #now do tttest on counts
-   tt_counts <- t.test(x = test_data$gfp_count,y = control_data$gfp_count,var.equal = TRUE)
+ #  tt_counts <- t.test(x = test_data$gfp_count,y = control_data$gfp_count,var.equal = TRUE)
 
    
-   p_counts <- ifelse(tt_counts$estimate[1] > tt_counts$estimate[2],tt_counts$p.value,1.0)
+ #  p_counts <- ifelse(tt_counts$estimate[1] > tt_counts$estimate[2],tt_counts$p.value,1.0)
    
   
     #now do ttest on area
-   tt_area <- t.test(x = test_data$gfp_area,y = control_data$gfp_area,var.equal = TRUE)
+  tt_area <- t.test(x = test_data$gfp_area,y = control_data$gfp_area,var.equal = TRUE)
 
    
    p_area <- ifelse(tt_area$estimate[1] > tt_area$estimate[2],tt_area$p.value,1.0)
@@ -60,7 +65,7 @@ for(j in 1:length(concentrations))
    ttest_results <-rbind(ttest_results,data.frame(var_compound =test_data$var_compound[1],
                                   concentration =concentrations[j],
                                   p_value = round(p,4),
-                                  p_value_counts = round(p_counts,4),
+                               #   p_value_counts = round(p_counts,4),
                                   p_value_area = round(p_area,4),
                                   control_compound =selected_control ))
    

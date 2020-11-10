@@ -1,4 +1,4 @@
-summary_data <- function(parsed_data,filePath,input,progress){
+summary_data2 <- function(parsed_data,filePath,input,progress){
   
   filePath <- paste0(filePath,"/ImageAppoutput")  
   
@@ -26,20 +26,32 @@ summary_data <- function(parsed_data,filePath,input,progress){
   s<- s[order(s$var_compound,s$concentration),]
   
   
-  #do ttest on parsed_data
-  
+ #  #do ttest on parsed_data
+   
   compounds <- unique(m$var_compound[is.na(m$control) & !is.na(m$concentration)])
+   
+   controls <-c("none", unique(m$concentration[!is.na(m$control)]) )
+   
+   tt<-  do_ttest(m,input,compounds,controls)
+ #  print(str(tt))
+ #  
+ print(tt)
+ #  
+ #  progress$inc(amount = 0.1,message = "Writing Data")
+ #  
+   s <- merge(s,tt,all.x=T)
+ #  
   
-  controls <-c("none", unique(m$concentration[!is.na(m$control)]) )
   
-  tt<-  do_ttest(m,input,compounds,controls)
-  print(str(tt))
   
- # print(tt)
+  snames <- colnames(s)
+  snames <- str_replace(snames,"_area","_count")
   
-  progress$inc(amount = 0.1,message = "Writing Data")
+  st <- s
   
-  s <- merge(s,tt,all.x=T)
+  colnames(st) <- snames
+ # write.csv(st,file=paste0(filePath,"/summary_data.csv"),row.names = FALSE)
+  
   
   write.csv(s,file="temp_summary_data.csv",row.names = FALSE)
   

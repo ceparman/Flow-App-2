@@ -1,5 +1,5 @@
 
-all_data_script <- function(gfp_file,total_file,dual_file,plate_map_file,filePath,input,progress)
+all_data_script <- function(inFile,plate_map_file,filePath,input,progress)
   
 {
   
@@ -15,11 +15,15 @@ filePath <- paste0(filePath,"/ImageAppoutput")
   
 plate <- makePlate()
 
-if(input$useplatefile) {
+if(!input$uselimsplate) {
   
-
+  
+  print("using plate file")
+  print(plate_map_file)
 
 plate_map <- parse_plate_map2(plate_map_file ) 
+
+
 
 }else {
 
@@ -48,23 +52,31 @@ lo<- CoreAPIV2::logOut(creds)
 }
 progress$inc(amount = 0.1)
 
-if(input$file_type == "dual"){
-  data1 <- processReaderFile(gfp_file,plate,progress) 
-  data2 <- processReaderFile(total_file,plate,progress) 
-}
-  else{
-    data1 <- processReaderFileSingle(dual_file,plate,23,progress) 
-    data2 <- processReaderFileSingle(dual_file,plate,17,progress) 
+#if(input$file_type == "dual"){
+#  data1 <- processReaderFile(gfp_file,plate,progress) 
+#  data2 <- processReaderFile(total_file,plate,progress) 
+#}
+#  else{
+#    data1 <- processReaderFileSingle(dual_file,plate,23,progress) 
+#    data2 <- processReaderFileSingle(dual_file,plate,17,progress) 
     
-    print(paste("Dual file loaded ",nrow(data2 ),"rows"))
+#    print(paste("Dual file loaded ",nrow(data2 ),"rows"))
     
-  }
+ # }
 #Combine data
 
 
-all_data <- data.frame(Well=data1$Well,gfp_area=data1$`Total Area`,gfp_count=data1$`Total Count`,
-                       allcells_area=data2$`Total Area`,allcells_count=data2$`Total Count`,
-                       percent = 100*data1$`Total Area`/ data2$`Total Area`)
+
+
+#all_data <- data.frame(Well=data1$Well,gfp_area=data1$`Total Area`,gfp_count=data1$`Total Count`,
+#                       allcells_area=data2$`Total Area`,allcells_count=data2$`Total Count`,
+#                       percent = 100*data1$`Total Area`/ data2$`Total Area`)
+
+
+all_data <- processFlowFile(inFile,plate)
+
+
+
 #Add columns reject
 
 all_data$rejected <- rep(0,nrow(all_data))
@@ -73,11 +85,11 @@ all_data$rejected <- rep(0,nrow(all_data))
 
 ### Write output
 
-m<- merge(plate_map,all_data,by="Well")
+m<- merge(plate_map,all_data,by=c("Well","index"))
 
 m <- m[order(m$index),]
 
-#write.csv(m,file=paste0(filePath,"/All_data.csv"),row.names = FALSE)  #We will need to move this write statement to after point rejections
+write.csv(m,file="temp_All_data.csv",row.names = FALSE)  #We will need to move this write statement to after point rejections
 
 
 list(parsed_data = m, plate = plate_map)

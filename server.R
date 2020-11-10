@@ -61,6 +61,30 @@ shinyServer(function(input, output, session) {
     
   })
   
+  output$limsplate <- renderUI({  
+   if(input$uselimsplate){
+   tagList(
+  fluidRow(
+    column(4,  textInput("user", "enter user name","Contractor")),
+    column(4,  passwordInput("password","enter password",""))       
+  ),  
+  fluidRow(
+    column(4,  actionButton("validate", "validate credentials")),
+    column(4,  textOutput(outputId = "logmessage")) 
+  ),
+  fluidRow(
+     column(4,textInput("plate_barcode", "enter plate barcode",value = "WCP31"))
+  )
+   )  
+   }
+  
+  
+})
+  
+  
+  
+  
+  
   output$fileinput <- renderUI({  
   
     if(input$file_type == "dual"){
@@ -91,7 +115,7 @@ shinyServer(function(input, output, session) {
   
   output$status <- renderText({ 
     
-    if (is.null(input$gfp_file)) "Select inputs" else "Hit Process"
+    if (is.null(input$input_file)) "Select inputs" else "Hit Process"
     })
   
  
@@ -99,7 +123,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$load,{
     
-    if ( (is.null( input$gfp_file) & is.null(input$image_file)) )
+    if(is.null( input$input_file) )
     {
     
       return()
@@ -116,12 +140,14 @@ shinyServer(function(input, output, session) {
       on.exit(progress$close())  
       
 
-       parsed_data <<-all_data_script(input$gfp_file$datapath,input$total_file$datapath,input$image_file$datapath,
+       parsed_data <<-all_data_script(input$input_file$datapath,
                        input$plate_file$datapath,getwd(),input,progress)
                       
-              
+         
+       
+       write.csv(parsed_data$parsed_data,"temp_parsed_data.csv")     
                         
-
+       write.csv(parsed_data$plate,"temp_plate_map.csv")     
       
       
                       
@@ -175,7 +201,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$process,{
     
     
-    if (  is.null(input$gfp_file)  & is.null(input$image_file) )
+    if (is.null(input$input_file ))
     {
       
       return()
@@ -191,8 +217,11 @@ shinyServer(function(input, output, session) {
       progress <- Progress$new(session)
       on.exit(progress$close())  
       
-      processed_data <<- summary_data(parsed_data,getwd(),input,progress)
-
+     # processed_data <<- summary_data(parsed_data,getwd(),input,progress)
+        print(input$compound1)
+      
+      processed_data <<- summary_data2(parsed_data,getwd(),input,progress)
+      
       ### run rejections here
       
       
@@ -248,7 +277,7 @@ shinyServer(function(input, output, session) {
     progress <- Progress$new(session)
     on.exit(progress$close())  
     
-    final_data <- summary_data(list(
+    final_data <- summary_data2(list(
                                     parsed_data=processed_data$well,
                                     plate=parsed_data$plate),
                                     getwd(),input,progress)
@@ -351,27 +380,27 @@ shinyServer(function(input, output, session) {
     
     
     
-    observeEvent(input$total_file,{
+    observeEvent(input$input_file,{
       
  
       
-      if ( !is.null( input$total_file) & !is.null( input$gfp_file)) { enable("load")}
+      if ( !is.null( input$input_file)) { enable("load")}
       
-              })
+      })
           
-    observeEvent(input$gfp_file,{
+ #  observeEvent(input$gfp_file,{
       
      
-      if ( !is.null( input$total_file) & !is.null( input$gfp_file)) { enable("load")}
+  #    if ( !is.null( input$total_file) & !is.null( input$gfp_file)) { enable("load")}
       
-    })
+  #  })
     
    
-    observeEvent(input$image_file,{
+ #   observeEvent(input$image_file,{
 
-      if ( ( !is.null(input$image_file) & (input$file_type == "single") )) { enable("load")}
+#      if ( ( !is.null(input$image_file) & (input$file_type == "single") )) { enable("load")}
       
-    })
+ #   })
     
      
   })

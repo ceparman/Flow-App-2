@@ -21,11 +21,11 @@ if(is.null(plot_comments)){
 
 #stack the data
 
-gfp_data <- plot_data %>% select(mean_gfp_area, std_gfp_area,concentration,units,control,mean_percent,maxy,p_value,p_value_counts,p_value_area ) %>% 
+gfp_data <- plot_data %>% select(mean_gfp_area, std_gfp_area,concentration,units,control,mean_percent,maxy,p_value,p_value_area ) %>% 
   mutate(target = "Total GFP+ Area")%>% mutate ( mean = mean_gfp_area, std = std_gfp_area ) %>% 
   select(-mean_gfp_area, -std_gfp_area)
 
-all_data <- plot_data %>% select(mean_all_area, std_all_area,concentration,units,control, mean_percent,maxy,p_value,p_value_counts, p_value_area ) %>% 
+all_data <- plot_data %>% select(mean_all_area, std_all_area,concentration,units,control, mean_percent,maxy,p_value, p_value_area ) %>% 
   mutate(target = "Total Cell Area")%>% mutate ( mean = mean_all_area, std = std_all_area ) %>% 
   select(-mean_all_area, -std_all_area)
 
